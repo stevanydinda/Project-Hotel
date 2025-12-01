@@ -1,9 +1,7 @@
-@extends('template.app')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="w-full max-w-2xl mx-auto my-10 px-4">
 
-    {{-- Breadcrumb --}}
+    
     <nav class="text-sm mb-6">
         <ol class="list-reset flex text-gray-600 space-x-2">
             <li>
@@ -18,20 +16,20 @@
         </ol>
     </nav>
 
-    {{-- Card --}}
+    
     <div class="bg-white shadow-md rounded-lg p-6">
         <h2 class="text-center text-xl font-semibold mb-6 text-gray-800">Tambah Data Kamar</h2>
 
-        <form method="POST" action="{{ route('admin.rooms.store') }}" enctype="multipart/form-data">
-            @csrf
-            {{-- Nama Kamar --}}
+        <form method="POST" action="<?php echo e(route('admin.rooms.store')); ?>" enctype="multipart/form-data">
+            <?php echo csrf_field(); ?>
+            
             <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Kamar</label>
                 <input type="text" id="name" name="name"
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none">
             </div>
 
-            {{-- Kapasitas --}}
+            
             <div class="mb-4">
                 <label for="kapasitas" class="block text-sm font-medium text-gray-700 mb-1">Kapasitas</label>
                 <input type="number" id="kapasitas" name="kapasitas"
@@ -44,37 +42,37 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-md">
             </div>
 
-            {{-- Deskripsi --}}
+            
             <div class="mb-4">
                 <label for="deskripsi" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                 <input type="text" id="deskripsi" name="deskripsi"
                     class="w-full px-4 py-2 border border-gray-300 rounded-md">
             </div>
 
-            {{-- Harga --}}
+            
             <div class="mb-4">
                 <label for="harga" class="block text-sm font-medium text-gray-700 mb-1">Harga</label>
                 <input type="number" id="harga" name="harga"
                     class="w-full px-4 py-2 border border-gray-300 rounded-md">
             </div>
 
-            {{-- Tipe Kamar --}}
+            
             <div class="mb-4">
                 <label for="tipe_kamar" class="block text-sm font-medium text-gray-700 mb-1">Tipe Kamar</label>
                 <input type="text" id="tipe_kamar" name="tipe_kamar"
                     class="w-full px-4 py-2 border border-gray-300 rounded-md">
             </div>
 
-            {{-- Image --}}
+            
             <div class="mb-4">
                 <label for="image" class="block text-sm font-medium text-gray-700 mb-1">Image</label>
                 <input type="file" id="image" name="image"
                     class="w-full">
             </div>
 
-            {{-- Tombol --}}
+            
             <div class="flex justify-between items-center">
-                <a href="{{ route('admin.rooms.index') }}"
+                <a href="<?php echo e(route('admin.rooms.index')); ?>"
                     class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-5 py-2 rounded-md transition">
                     ← Kembali
                 </a>
@@ -88,4 +86,5 @@
         </form>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Hanin\Documents\Project-Hotel\resources\views/admin/room/create.blade.php ENDPATH**/ ?>

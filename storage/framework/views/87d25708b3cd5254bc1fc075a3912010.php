@@ -1,17 +1,17 @@
-@extends('template.app')
-    {{-- DATATABLES CSS --}}
+    
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.tailwindcss.css">
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container mx-auto mt-6 px-4">
 
-    @if (Session::get('success'))
+    <?php if(Session::get('success')): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ Session::get('success') }}
+            <?php echo e(Session::get('success')); ?>
+
         </div>
-    @endif
+    <?php endif; ?>
 
     <div class="flex justify-end space-x-2 mb-4">
-        <a href="{{ route('admin.rooms.trash') }}"
+        <a href="<?php echo e(route('admin.rooms.trash')); ?>"
             class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded">
             Data Sampah Kamar
         </a>
@@ -19,11 +19,11 @@
             class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded">
             Export (.xlsx)
         </a>
-        <a href="{{ route('admin.rooms.create') }}"
+        <a href="<?php echo e(route('admin.rooms.create')); ?>"
             class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded">
             Tambah Data
         </a>
-        <a href="{{ url()->previous() }}"
+        <a href="<?php echo e(url()->previous()); ?>"
             class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
             Kembali
         </a>
@@ -47,16 +47,16 @@
         </thead>
     </table>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 
 <script>
 $(function () {
     $("#tableRoom").DataTable({
         processing: true,
         serverSide: true,
-        ajax: "{{ route('admin.rooms.datatables') }}",
+        ajax: "<?php echo e(route('admin.rooms.datatables')); ?>",
         columns: [
             { data: 'DT_RowIndex', searchable: false, orderable: false },
             { data: 'gambar', name: 'gambar_kamar'},
@@ -70,4 +70,6 @@ $(function () {
     });
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Hanin\Documents\Project-Hotel\resources\views/admin/room/index.blade.php ENDPATH**/ ?>

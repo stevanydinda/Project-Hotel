@@ -52,6 +52,7 @@ Route::middleware('isAdmin')->prefix('/admin')->name('admin.')->group(function (
         Route::get('/trash', [RoomController::class, 'trash'])->name('trash');
         Route::patch('/restore/{id}', [RoomController::class, 'restore'])->name('restore');
         Route::delete('/delete-permanent/{id}', [RoomController::class, 'deletePermanent'])->name('delete_permanent');
-        Route::get('/datatables', [RoomController::class, 'datatables'])->name('datatables');
-    });
+
+    }); 
 });
+Route::get('/admin/rooms/datatables', [RoomController::class, 'datatables'])->name('admin.rooms.datatables');

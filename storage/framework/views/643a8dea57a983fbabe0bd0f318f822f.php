@@ -1,1 +1,0 @@
-<?php /**PATH C:\laragon\www\hotel-project\resources\views\admin\payment\create.blade.php ENDPATH**/ ?>

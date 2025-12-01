@@ -16,7 +16,9 @@ return new class extends Migration
             $table->integer('jumlah_kamar')->default(0); // stok kamar tersedia
 
             // Tidak jadi relasi ke hotels → tetap boleh ada ID untuk fleksibilitas
-            $table->unsignedBigInteger('hotel_id')->nullable();
+
+            // tidak ada table hotel jadi tidak bisa ada relasi apapun untuk hotel_id, kampung
+            // $table->unsignedBigInteger('hotel_id')->nullable();
 
             $table->integer('kapasitas')->default(1);     // jumlah orang
             $table->text('deskripsi')->nullable();        // detail kamar

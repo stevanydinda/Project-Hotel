@@ -20,11 +20,17 @@ class RoomController extends Controller
 
         return DataTables::of($rooms)
             ->addIndexColumn()
+            ->addColumn('gambar', function($row) {
+                if ($row->image) {
+                    return '<img src="' . Storage::url($row->image) . '" alt="Gambar Kamar" class="w-16 h-16 object-cover">';
+                }
+                return 'No Image';
+            })
             ->addColumn('kamar', fn($row) => $row->tipe_kamar)
             ->addColumn('jumlah', fn($row) => $row->jumlah_kamar)
             ->addColumn('kapasitas', fn($row) => $row->kapasitas)
             ->addColumn('harga', fn($row) => number_format($row->harga, 0, ',', '.'))
-            ->rawColumns(['kamar'])
+            ->rawColumns(['gambar', 'kamar'])
             ->make(true);
     }
 
@@ -36,12 +42,13 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'kapasitas'     => 'required|integer',
-            'image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'tipe_kamar'    => 'required|string',
-            'harga'         => 'required|integer',
-            'jumlah_kamar'  => 'required|integer',
+            'name' => 'required|string|max:255',
+            'kapasitas' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'tipe_kamar' => 'required|string',
+            'harga' => 'required|integer',
+            'jumlah_kamar' => 'required|integer',
+            'deskripsi' => 'required|string|max:255',
         ]);
 
         $path = null;
@@ -50,19 +57,17 @@ class RoomController extends Controller
             $filename = time() . '.' . $request->image->extension();
             $path = $request->image->storeAs('rooms', $filename, 'public');
         }
-
         Room::create([
-            'name'          => $request->name,
-            'kapasitas'     => $request->kapasitas,
-            'image'         => $path,
-            'tipe_kamar'    => $request->tipe_kamar,
-            'harga'         => $request->harga,
-            'jumlah_kamar'  => $request->jumlah_kamar,
+            'name' => $request->name,
+            'kapasitas' => $request->kapasitas,
+            'image' => $path,
+            'tipe_kamar' => $request->tipe_kamar,
+            'harga' => $request->harga,
+            'jumlah_kamar' => $request->jumlah_kamar,
+            'deskripsi' => $request->deskripsi,
         ]);
 
-        return redirect()
-            ->route('admin.rooms.index')
-            ->with('success', 'Data kamar berhasil ditambahkan.');
+        return redirect()->route('admin.rooms.index')->with('success', 'Data kamar berhasil ditambahkan.');
     }
 
     public function edit(Room $room)

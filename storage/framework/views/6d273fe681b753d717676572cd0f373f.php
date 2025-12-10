@@ -86,8 +86,8 @@
                     },
 
                     {
-                        data: 'total_amount',
-                        name: 'total_amount'
+                        data: 'total_harga',
+                        name: 'total_harga'
                     },
 
                     {

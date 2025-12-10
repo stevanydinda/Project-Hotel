@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
-use App\Models\Payment;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -105,14 +104,14 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with(['rooms', 'payments'])->latest()->get();
+        $bookings = Booking::with(['rooms'])->latest()->get();
 
         return view('admin.booking.index', compact('bookings'));
     }
 
     public function adminShow($id)
     {
-        $booking = Booking::with(['rooms', 'payments'])->findOrFail($id);
+        $booking = Booking::with(['rooms'])->findOrFail($id);
 
         return view('admin.booking.show', compact('booking'));
     }
@@ -166,29 +165,18 @@ class BookingController extends Controller
         return back()->with('success', 'Status berhasil diperbarui');
     }
 
-    public function verifyPaymentAdmin($id)
-    {
-        $booking = Booking::findOrFail($id);
 
-        Payment::where('id_Pemesanan', $booking->p_lu_Pemesanan)
-            ->update(['status_pembayaran' => 'lunas']);
-
-        $booking->status_pemesanan = 'confirmed';
-        $booking->save();
-
-        return back()->with('success', 'Pembayaran berhasil diverifikasi.');
-    }
 
     public function datatables()
     {
-        $bookings = Booking::with(['rooms', 'payments', 'user'])->latest()->get();
+        $bookings = Booking::with(['rooms', 'user'])->latest()->get();
 
         return datatables()->of($bookings)
             ->addIndexColumn()
             ->addColumn('kode_booking', fn ($b) => $b->p_lu_Pemesanan)
             ->addColumn('nama_kamar', fn ($b) => $b->rooms ? $b->rooms->tipe_kamar : '-')
             ->addColumn('customer_name', fn ($b) => $b->user ? $b->user->name : '-')
-            ->addColumn('total_amount', fn ($b) => $b->rooms ? 'Rp '.number_format($b->rooms->harga * $b->jnu_kamar_dipesan, 0, ',', '.') : 'Rp 0')
+            ->addColumn('total_harga', fn ($b) => $b->rooms ? 'Rp '.number_format($b->rooms->harga * $b->jnu_kamar_dipesan, 0, ',', '.') : 'Rp 0')
             ->addColumn('checkin', fn ($b) => $b->tgl_checkin)
             ->addColumn('checkout', fn ($b) => $b->tgl_checkout)
             ->addColumn('jumlah_kamar', fn ($b) => $b->jnu_kamar_dipesan)
@@ -260,7 +248,7 @@ class BookingController extends Controller
         // Path publik ke QR file
         $qrPath = asset('storage/'.$filePath);
 
-        // Kirim ke view 
+        // Kirim ke view
         return view('user.booking.qr', compact('booking', 'qrPath', 'qrSvg'));
     }
 }

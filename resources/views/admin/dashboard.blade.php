@@ -20,28 +20,71 @@
                 <div class="bg-yellow-100 p-6 rounded-lg shadow hover:shadow-lg transition">
                     <h3 class="text-lg font-semibold text-yellow-800 mb-2">Manajemen User</h3>
                     <p class="text-gray-700">Kelola akun pengguna aplikasi hotel.</p>
-                    <a href="{{ route('admin.users.index') }}" class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Data →</a>
+                    <a href="{{ route('admin.users.index') }}"
+                        class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Data →</a>
                 </div>
 
                 <div class="bg-yellow-100 p-6 rounded-lg shadow hover:shadow-lg transition">
                     <h3 class="text-lg font-semibold text-yellow-800 mb-2">Manajemen Kamar</h3>
-                    <p class="text-gray-700">Tambahkan, ubah, atau hapus data kamar hotel.</p>
-                    <a href="{{ route('admin.rooms.index') }}" class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Kelola Kamar →</a>
+                    <p class="text-gray-700">Tambahkan kamar hotel.</p>
+                    <a href="{{ route('admin.rooms.index') }}"
+                        class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Kelola Kamar →</a>
                 </div>
 
                 <div class="bg-yellow-100 p-6 rounded-lg shadow hover:shadow-lg transition">
                     <h3 class="text-lg font-semibold text-yellow-800 mb-2">Laporan Reservasi</h3>
                     <p class="text-gray-700">Lihat data transaksi dan pemesanan terbaru.</p>
-                    <a href="#" class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Laporan →</a>
+                    <a href="{{ route('admin.bookings.index') }}"
+                        class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Laporan →</a>
                 </div>
-
-                 <div class="bg-yellow-100 p-6 rounded-lg shadow hover:shadow-lg transition">
-                    <h3 class="text-lg font-semibold text-yellow-800 mb-2">Laporan Keuangan</h3>
-                    <p class="text-gray-700">Lihat data transaksi dan pembayaran terbaru.</p>
-                    <a href="#" class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Laporan →</a>
-                </div>
-
             </div>
+        </div>
+        <div class="mt-12 text-center">
+            <h5 class="text-xl font-semibold text-yellow-800">Grafik Pembelian Kamar</h5>
+        </div>
+        <div class ="bg-white p-6 rounded-lg shadow mt-6">
+            <canvas id="chartBar" class="w-full h-64"></canvas>
         </div>
     </div>
 @endsection
+
+@push('script')
+<script>
+    $(function() {
+        $.ajax({
+            url: "{{ route('admin.chart') }}",
+            method: 'GET',
+            success: function(response){
+                let labels = response.labels;
+                let data = response.data;
+
+                const ctx = document.getElementById('chartBar').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Jumlah Pemesanan Kamar',
+                            data: data,
+                            backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            },
+            error: function(err){
+                alert('Gagal mengambil data untuk grafik');
+            }
+        });
+    });
+</script>
+@endpush

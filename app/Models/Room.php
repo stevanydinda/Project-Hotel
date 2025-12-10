@@ -15,4 +15,9 @@ class Room extends Model
         'jumlah_kamar',
         'deskripsi',
     ];
+    public function bookings()
+    {
+    return $this->hasMany(Booking::class, 'id_Kamar', 'id');
+    }
+
 }

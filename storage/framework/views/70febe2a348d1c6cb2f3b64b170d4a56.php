@@ -1,0 +1,1 @@
+<?php /**PATH C:\laragon\www\hotel-project\resources\views\admin\room\trash.blade.php ENDPATH**/ ?>

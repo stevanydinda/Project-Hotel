@@ -1,0 +1,164 @@
+<?php $__env->startSection('content'); ?>
+    <div class="container mx-auto px-4 py-6 max-w-4xl">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white">
+                <h1 class="text-2xl font-bold text-center">RINGKASAN BOOKING</h1>
+                <p class="text-center text-blue-100">Kode: <?php echo e($booking->p_lu_Pemesanan); ?></p>
+            </div>
+
+            <div class="p-6">
+                <!-- Room Info -->
+                <div class="flex flex-col md:flex-row gap-6 mb-8">
+                    <?php if($booking->rooms->image): ?>
+                        <img src="<?php echo e(asset('storage/' . $booking->rooms->image)); ?>"
+                            class="w-full md:w-48 h-48 object-cover rounded-xl">
+                    <?php else: ?>
+                        <div class="w-full md:w-48 h-48 bg-gray-200 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-4xl"></i>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="flex-1">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2"><?php echo e($booking->rooms->name); ?></h2>
+                        <p class="text-gray-600 mb-4"><?php echo e($booking->rooms->description ?? 'Kamar nyaman untuk menginap'); ?>
+
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-users text-blue-500 mr-3"></i>
+                                <span>Kapasitas: <?php echo e($booking->rooms->kapasitas); ?> orang</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-bed text-blue-500 mr-3"></i>
+                                <span>Stok: <?php echo e($booking->rooms->jumlah_kamar); ?> kamar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Details + Price -->
+                <?php
+                    $nights = \Carbon\Carbon::parse($booking->tgl_checkin)->diffInDays($booking->tgl_checkout);
+                    $totalPrice = $booking->rooms->harga * $nights * $booking->jnu_kamar_dipesan;
+                ?>
+
+                <div class="bg-gray-50 rounded-xl p-5 mb-6">
+                    <h3 class="font-bold text-gray-800 mb-4">Detail Booking</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="mb-3">
+                                <label class="block text-gray-600 text-sm mb-1">Check-in</label>
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-check text-green-500 mr-3"></i>
+                                    <span class="font-bold"><?php echo e(date('d M Y', strtotime($booking->tgl_checkin))); ?></span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-gray-600 text-sm mb-1">Check-out</label>
+                                <div class="flex items-center">
+                                    <i class="fas fa-calendar-times text-red-500 mr-3"></i>
+                                    <span class="font-bold"><?php echo e(date('d M Y', strtotime($booking->tgl_checkout))); ?></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="mb-3">
+                                <label class="block text-gray-600 text-sm mb-1">Jumlah Malam</label>
+                                <div class="flex items-center">
+                                    <i class="fas fa-moon text-purple-500 mr-3"></i>
+                                    <span class="font-bold"><?php echo e($nights); ?> Malam</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="block text-gray-600 text-sm mb-1">Jumlah Kamar</label>
+                                <div class="flex items-center">
+                                    <i class="fas fa-door-closed text-orange-500 mr-3"></i>
+                                    <span class="font-bold"><?php echo e($booking->jnu_kamar_dipesan); ?> Kamar</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-gray-600 text-sm mb-1">Total Harga</label>
+                                <div class="flex items-center">
+                                    <i class="fas fa-wallet text-green-500 mr-3"></i>
+                                    <span class="font-bold text-green-600">
+                                        Rp <?php echo e(number_format($totalPrice, 0, ',', '.')); ?>
+
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <?php $status = strtolower($booking->status_pemesanan); ?>
+                <div class="mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-gray-600">Status:</span>
+                            <span
+                                class="ml-2 px-3 py-1 rounded-full text-sm font-bold
+                            <?php if($status == 'pending'): ?> bg-yellow-100 text-yellow-800
+                            <?php elseif($status == 'diterima'): ?> bg-green-100 text-green-800
+                            <?php elseif($status == 'ditolak'): ?> bg-red-100 text-red-800
+                            <?php else: ?> bg-gray-100 text-gray-800 <?php endif; ?>">
+                                <?php echo e(strtoupper($booking->status_pemesanan)); ?>
+
+                            </span>
+                        </div>
+                        <div class="text-gray-500 text-sm">
+                            <i class="far fa-clock mr-1"></i>
+                            <?php echo e($booking->created_at->format('d M Y H:i')); ?>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Buttons: Cancel & Pay -->
+                <div class="flex justify-between items-center mt-6">
+                    <form action="<?php echo e(route('user.booking.cancel', $booking->id)); ?>" method="POST"
+                        onsubmit="return confirm('Yakin ingin membatalkan booking?')">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                            Batalkan Booking
+                        </button>
+                    </form>
+                    <button type="button" onclick="createQR()"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                        Bayar Sekarang
+                    </button>
+
+                    <input type="hidden" id="booking_id" value="<?php echo e($booking->id); ?>">
+
+                    <?php $__env->startPush('script'); ?>
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                        <script>
+                            function createQR() {
+                                const bookingId = $('#booking_id').val();
+
+                                $.ajax({
+                                    url: "<?php echo e(route('user.booking.generate-qr')); ?>",
+                                    type: "POST",
+                                    data: {
+                                        _token: "<?php echo e(csrf_token()); ?>",
+                                        booking_id: bookingId
+                                    },
+                                    success: function(response) {
+                                        alert(response.message);
+                                        window.location.href = `/user/booking/${bookingId}/payment`;
+                                    },
+                                    error: function(xhr) {
+                                        console.error(xhr.responseText);
+                                        alert("Terjadi kesalahan di server saat membuat QR!");
+                                    }
+                                });
+                            }
+                        </script>
+                    <?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\hotel-project\resources\views\user\booking\summary.blade.php ENDPATH**/ ?>

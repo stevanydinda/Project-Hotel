@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->string('id_Pembayaran')->unique();
-            $table->string('id_Pemesanan'); // Ini yang akan jadi foreign key
+            $table->string('id_Pemesanan'); 
             $table->string('metode_pembayaran');
             $table->integer('jumlah_bayar');
             $table->string('status_pembayaran');
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // Foreign key constraint
+            $table->foreign('id_Pemesanan')->references('p_lu_Pemesanan')->on('bookings');
 
         });
     }

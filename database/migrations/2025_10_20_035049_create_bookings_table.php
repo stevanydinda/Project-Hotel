@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('p_lu_Pemesanan')->unique();  // Perbaiki typo disini
             $table->string('id_User');
-            $table->string('id_Kamar');
+            $table->integer('id_Kamar');
             $table->date('tgl_checkin');
             $table->date('tgl_checkout');
             $table->integer('jnu_kamar_dipesan');

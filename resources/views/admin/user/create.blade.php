@@ -3,24 +3,9 @@
 @section('content')
 <div class="w-full max-w-2xl mx-auto my-10 px-4">
 
-    {{-- Breadcrumb --}}
-    <nav class="text-sm mb-6">
-        <ol class="list-reset flex text-gray-600 space-x-2">
-            <li>
-                <a href="#" class="hover:underline text-yellow-600">Pengguna</a>
-            </li>
-            <li>/</li>
-            <li>
-                <a href="#" class="hover:underline text-yellow-600">Data</a>
-            </li>
-            <li>/</li>
-            <li class="text-gray-500">Tambah</li>
-        </ol>
-    </nav>
-
     {{-- Card --}}
     <div class="bg-white shadow-md rounded-lg p-6">
-        <h2 class="text-center text-xl font-semibold mb-6 text-gray-800">Tambah Data Petugas</h2>
+        <h2 class="text-center text-xl font-semibold mb-6 text-gray-800">Tambah Data User</h2>
 
         <form method="POST" action="{{ route('admin.users.store') }}">
             @csrf

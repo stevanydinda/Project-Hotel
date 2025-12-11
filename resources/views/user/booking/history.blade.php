@@ -20,8 +20,7 @@
         <table id="tableBooking" class="min-w-[70%] mx-auto border border-gray-300 rounded-lg shadow">
             <thead class="bg-gray-100">
                 <tr>
-                    <th class="p-3">#</th
-                    <th class="p-3">KodeBooking</th>
+                    <th class="p-3">#</th <th class="p-3">KodeBooking</th>
                     <th class="p-3">Kamar</th>
                     <th class="p-3">Check-in</th>
                     <th class="p-3">Check-out</th>
@@ -35,7 +34,7 @@
                     <tr>
                         <td class="p-3 text-center">{{ $loop->iteration }}</td>
                         <td class="p-3 text-center">{{ $booking->p_lu_Pemesanan }}</td>
-                        <td class="p-3 text-center">{{ $booking->room->nama_kamar }}</td>
+                        <td class="p-3 text-center">{{ $booking->tipe_kamar }}</td>
                         <td class="p-3 text-center">{{ $booking->tgl_checkin }}</td>
                         <td class="p-3 text-center">{{ $booking->tgl_checkout }}</td>
                         <td class="p-3 text-center">{{ $booking->jnu_kamar_dipesan }}</td>
@@ -44,6 +43,7 @@
                     </tr>
                 @endforeach
             </tbody>
+
         </table>
     </div>
     </div>

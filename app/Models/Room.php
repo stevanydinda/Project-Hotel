@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Room extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
         'kapasitas',
@@ -15,9 +18,9 @@ class Room extends Model
         'jumlah_kamar',
         'deskripsi',
     ];
+
     public function bookings()
     {
-    return $this->hasMany(Booking::class, 'id_Kamar', 'id');
+        return $this->hasMany(Booking::class, 'id_Kamar', 'id');
     }
-
 }

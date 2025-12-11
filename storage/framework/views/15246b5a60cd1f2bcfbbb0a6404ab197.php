@@ -2,14 +2,29 @@
     <div class="container mx-auto mt-6 px-4 max-w-2xl bg-white p-6 rounded-lg shadow">
         <h2 class="text-2xl font-semibold mb-6 text-center text-yellow-700">Edit Booking</h2>
 
+
+        <?php if(session('success')): ?>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                <?php echo e(session('success')); ?>
+
+            </div>
+        <?php endif; ?>
+        <?php if(session('error')): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?php echo e(session('error')); ?>
+
+            </div>
+        <?php endif; ?>
+
+
         <form action="<?php echo e(route('admin.bookings.update', $booking->id)); ?>" method="POST" class="space-y-4">
             <?php echo csrf_field(); ?>
             <?php echo method_field('PUT'); ?>
 
-            
+
             <input type="hidden" name="id_User" value="<?php echo e($booking->id_User); ?>">
 
-            
+          
             <input type="hidden" name="id_Kamar" value="<?php echo e($booking->id_Kamar); ?>">
 
             <div>

@@ -4,27 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage; // buat hapus/simpan file ke storage
-use Yajra\DataTables\Facades\DataTables; // biar datatables bisa jalan dari server
+use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 
 class RoomController extends Controller
 {
     public function index()
     {
-        // cuma nampilin halaman tabel aja, datanya nanti di-load via AJAX
         return view('admin.room.index');
     }
 
     public function datatables(Request $request)
     {
-        // bikin query awal data kamar
         $rooms = Room::query();
 
-        // fitur search datatables
         if ($request->search['value']) {
             $keyword = $request->search['value'];
-
-            // pencarian semua kolom
             $rooms->where(function ($q) use ($keyword) {
                 $q->where('name', 'like', "%$keyword%")
                     ->orWhere('tipe_kamar', 'like', "%$keyword%")
@@ -32,123 +27,177 @@ class RoomController extends Controller
             });
         }
 
-        // convert query ke format datatables
         return DataTables::of($rooms)
-            ->addIndexColumn() // biar ada kolom nomor urut
-
-            // kolom foto kamar
+            ->addIndexColumn()
             ->addColumn('gambar', function ($row) {
-                // asset() → ambil file yang ada di public/storage
                 if ($row->image) {
                     return '<img src="'.asset('storage/'.$row->image).'" class="w-16 h-16 object-cover rounded">';
                 }
 
                 return '<span class="text-red-500">No Image</span>';
             })
-
-            // kolom-kolom lain tinggal tampilin value masing2
             ->addColumn('kamar', fn ($row) => $row->tipe_kamar)
             ->addColumn('jumlah', fn ($row) => $row->jumlah_kamar)
             ->addColumn('kapasitas', fn ($row) => $row->kapasitas)
-
-            // format harga biar ada titiknya
             ->addColumn('harga', fn ($row) => number_format($row->harga, 0, ',', '.'))
-
-            // deskripsi dibatesin lebar biar ga meledak di tabel
             ->addColumn('deskripsi', function ($row) {
-                return '<div style="max-width:300px;white-space:normal;">'
-                    .e($row->deskripsi).
-                '</div>';
+                return '<div style="max-width:300px;white-space:normal;">'.e($row->deskripsi).'</div>';
             })
+            ->addColumn('action', function ($row) {
+                $btn = '<a href="'.route('admin.rooms.edit', $row->id).'" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded mr-2">Edit</a>';
 
-            // kasih tau datatables kalau ini HTML, jangan di-escape
-            ->rawColumns(['gambar', 'deskripsi'])
+                $btn .= '
+                    <form action="'.route('admin.rooms.destroy', $row->id).'" method="POST" style="display:inline;">
+                        '.csrf_field().'
+                        '.method_field('DELETE').'
+                        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                            onclick="return confirm(\'Are you sure?\')">Delete</button>
+                    </form>';
+
+                return $btn;
+            })
+            ->rawColumns(['gambar', 'deskripsi', 'action'])
             ->make(true);
     }
 
     public function create()
     {
-        // tampilkan halaman form tambah kamar
         return view('admin.room.create');
     }
 
     public function store(Request $request)
     {
-        // validasi data input dari admin
         $request->validate([
             'name' => 'required|string|max:255',
             'kapasitas' => 'required|integer',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'tipe_kamar' => 'required|string',
-            'harga' => 'required|integer',
+            'harga' => 'required', // jangan numeric
             'jumlah_kamar' => 'required|integer',
-            'deskripsi' => 'required|string|',
+            'deskripsi' => 'required|string',
         ]);
 
-        $path = null;
+        // Bersihkan titik (contoh: 2.500.000 → 2500000)
+        $harga = str_replace('.', '', $request->harga);
 
-        // cek apakah admin upload gambar
+        $path = null;
         if ($request->hasFile('image')) {
-            // simpan gambar ke storage/public/rooms
             $path = $request->file('image')->store('rooms', 'public');
         }
 
-        // simpan data kamar ke database
         Room::create([
             'name' => $request->name,
             'kapasitas' => $request->kapasitas,
             'image' => $path,
             'tipe_kamar' => $request->tipe_kamar,
-            'harga' => $request->harga,
+            'harga' => $harga,
             'jumlah_kamar' => $request->jumlah_kamar,
             'deskripsi' => $request->deskripsi,
         ]);
 
-        // balik ke tabel kamar sambil bawa notif sukses
         return redirect()->route('admin.rooms.index')->with('success', 'Data kamar berhasil ditambahkan.');
     }
 
-    public function destroy($id)
+    public function edit($id)
     {
-        // findOrFail → kalau ID ga ketemu langsung error 404
         $room = Room::findOrFail($id);
 
-        // kalau ada file gambar, hapus dari storage
-        if ($room->image) {
+        return view('admin.room.edit', compact('room'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'kapasitas' => 'required|integer',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'tipe_kamar' => 'required|string',
+            'harga' => 'required',
+            'jumlah_kamar' => 'required|integer',
+            'deskripsi' => 'required|string',
+        ]);
+
+        $room = Room::findOrFail($id);
+
+        // Bersihkan titik (contoh: 2.500.000 → 2500000)
+        $harga = str_replace('.', '', $request->harga);
+
+        if ($request->hasFile('image')) {
+            if ($room->image && Storage::disk('public')->exists($room->image)) {
+                Storage::disk('public')->delete($room->image);
+            }
+            $room->image = $request->file('image')->store('rooms', 'public');
+        }
+
+        $room->update([
+            'name' => $request->name,
+            'kapasitas' => $request->kapasitas,
+            'tipe_kamar' => $request->tipe_kamar,
+            'harga' => $harga,
+            'jumlah_kamar' => $request->jumlah_kamar,
+            'deskripsi' => $request->deskripsi,
+        ]);
+
+        return redirect()->route('admin.rooms.index')->with('success', 'Data kamar berhasil diperbarui.');
+    }
+
+
+    public function destroy($id)
+    {
+        $room = Room::findOrFail($id);
+
+       
+        $bookingDiterima = $room->bookings()
+            ->where('status_pemesanan', 'Diterima')
+            ->exists();
+
+        if ($bookingDiterima) {
+            return back()->with('error', 'Kamar tidak bisa dihapus karena sedang dibooking atau sudah diterima.');
+        }
+
+        $room->delete();
+
+        return back()->with('success', 'Kamar berhasil dihapus.');
+    }
+
+    public function trash()
+    {
+        $rooms = Room::onlyTrashed()->get();
+
+        return view('admin.room.trash', compact('rooms'));
+    }
+
+    public function restore($id)
+    {
+        $room = Room::onlyTrashed()->findOrFail($id);
+        $room->restore();
+
+        return redirect()->route('admin.rooms.trash')->with('success', 'Data kamar berhasil dikembalikan.');
+    }
+
+    public function deletePermanent($id)
+    {
+        $room = Room::onlyTrashed()->findOrFail($id);
+
+        if ($room->image && Storage::disk('public')->exists($room->image)) {
             Storage::disk('public')->delete($room->image);
         }
 
-        // hapus data dari database
-        $room->delete();
+        $room->forceDelete();
 
-        return redirect()->back()->with('success', 'Data berhasil dihapus');
+        return redirect()->route('admin.rooms.trash')->with('success', 'Data kamar berhasil dihapus permanen.');
     }
 
-    public function userIndex()
+    // ------------------- User -------------------
+    public function userindex()
     {
-        // ambil semua kamar dan kirim ke view user
         $rooms = Room::all();
 
-        return view('user.room.index', compact('rooms')); // compact = ngirim variabel ke view
+        return view('user.room.index', compact('rooms'));
     }
 
     public function userShow(Room $room)
     {
-        // Room $room → otomatis dapet data kamar dari ID (route model binding)
         return view('user.room.show', compact('room'));
-    }
-
-    public function orderStore(Request $request, Room $room)
-    {
-        // validasi data yang diisi user saat mau pesan
-        $request->validate([
-            'nama' => 'required|string',
-            'check_in' => 'required|date',
-            'check_out' => 'required|date|after:check_in',
-            'jumlah' => 'required|integer|min:1',
-        ]);
-
-        // belum ada proses simpan, cuma notif aja
-        return back()->with('success', 'Pemesanan berhasil!');
     }
 }

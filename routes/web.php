@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -17,22 +16,31 @@ Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
 
     // Halaman utama user
-    Route::get('/home', [UserController::class, 'index'])->name('home');
+    Route::get('/home', [UserController::class, 'userindex'])->name('home');
 
-    // Daftar kamar dan booking
-    Route::get('/jenis-kamar', [RoomController::class, 'index'])->name('jenis_kamar');
-    Route::get('/kamar/{id}/booking', [BookingController::class, 'create'])->name('kamar.booking');
-    Route::post('/kamar/{id}/booking', [BookingController::class, 'store'])->name('kamar.booking.store');
+    // Daftar kamar user
+    Route::get('/jenis-kamar', [RoomController::class, 'userindex'])->name('jenis_kamar');
+
+    // Detail kamar
+    Route::get('/jenis-kamar/{room}', [RoomController::class, 'userShow'])
+        ->name('room.show');
+
+    // Booking kamar (PERBAIKAN NAMA ROUTE DI SINI)
+    Route::get('/kamar/{room}/booking', [BookingController::class, 'userCreate'])
+        ->name('kamar.booking');
+
+    Route::post('/kamar/{room}/booking', [BookingController::class, 'userStore'])
+        ->name('kamar.booking.store');
 
     // Riwayat booking user
     Route::get('/my-bookings', [BookingController::class, 'myBookings'])->name('my.bookings');
     Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
-    Route::get('/booking/{id}/summary', [BookingController::class, 'summary'])->name('booking.summary');
+    Route::get('/booking/{id}/summary', [BookingController::class, 'userShowSummary'])
+        ->name('booking.summary');
 
-    //
+    // QR
     Route::get('/booking/{id}/qr', [BookingController::class, 'showQr'])->name('booking.qr');
 });
-
 
 Route::middleware(['auth', 'isAdmin'])->prefix('/admin')->name('admin.')->group(function () {
 
@@ -40,7 +48,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('/admin')->name('admin.')->group(
 
     Route::get('/bookings/datatables', [BookingController::class, 'datatables'])
         ->name('bookings.datatables');
-    Route::get('/bookings/chart',[BookingController::class,'dataChart'])->name('chart');
+    Route::get('/bookings/chart', [BookingController::class, 'dataChart'])->name('chart');
 
     // Users
     Route::prefix('/users')->name('users.')->group(function () {
@@ -62,27 +70,39 @@ Route::middleware(['auth', 'isAdmin'])->prefix('/admin')->name('admin.')->group(
         Route::get('/create', [RoomController::class, 'create'])->name('create');
         Route::post('/store', [RoomController::class, 'store'])->name('store');
         Route::get('/datatables', [RoomController::class, 'datatables'])->name('datatables');
+        Route::get('/edit/{id}', [RoomController::class, 'edit'])->name('edit');
+        Route::put('/update/{id}', [RoomController::class, 'update'])->name('update');
+
+        // Soft delete
+        Route::delete('/delete/{id}', [RoomController::class, 'destroy'])->name('destroy');
+
+        // Trash
+        Route::get('/trash', [RoomController::class, 'trash'])->name('trash');
+        Route::patch('/restore/{id}', [RoomController::class, 'restore'])->name('restore');
+        Route::delete('/delete-permanent/{id}', [RoomController::class, 'deletePermanent'])->name('deletePermanent');
     });
 
-    // Bookings
     Route::prefix('/bookings')->name('bookings.')->group(function () {
+
+
+        Route::get('/trash', [BookingController::class, 'trash'])->name('trash');
+        Route::patch('/{id}/restore', [BookingController::class, 'restore'])->name('restore');
+       Route::delete('/{id}/deletePermanent', [BookingController::class, 'deletePermanent'])->name('deletePermanent');
+
         Route::get('/', [BookingController::class, 'index'])->name('index');
         Route::get('/create/{room_id}', [BookingController::class, 'adminCreate'])->name('create');
         Route::post('/store', [BookingController::class, 'adminStore'])->name('store');
+
+
+        Route::patch('/{id}/status', [BookingController::class, 'updateStatus'])->name('update.status');
+        Route::post('/{id}/verify-payment', [BookingController::class, 'verifyPaymentAdmin'])->name('verify.payment');
+
+
         Route::get('/{id}', [BookingController::class, 'adminShow'])->name('show');
         Route::get('/{id}/edit', [BookingController::class, 'edit'])->name('edit');
         Route::put('/{id}/update', [BookingController::class, 'update'])->name('update');
         Route::delete('/{id}/delete', [BookingController::class, 'destroy'])->name('delete');
 
-        // Status update
-        Route::patch('/{id}/status', [BookingController::class, 'updateStatus'])->name('update.status');
-
-        // Admin verify payment (tanpa scan QR)
-        Route::post('/{id}/verify-payment', [BookingController::class, 'verifyPaymentAdmin'])->name('verify.payment');
     });
 
-    // Payments
-    Route::prefix('/payments')->name('payments.')->group(function () {
-        Route::get('/', [PaymentController::class, 'index'])->name('index');
-    });
 });

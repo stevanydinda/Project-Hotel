@@ -93,17 +93,21 @@ class BookingController extends Controller
     {
         $userId = auth()->id();
 
-        // with('rooms') = ambil data kamar hanya 1 query
-        // paginate(10) = tampilkan 10 data per halaman
         $bookings = Booking::where('id_User', $userId)
             ->with('rooms')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // transform() = modifikasi setiap item dalam collection
-        $bookings->transform(function ($booking) {
-            // Hitung total harga = harga kamar x jumlah kamar dipesan
-            $booking->total_harga = $booking->rooms->harga * $booking->jnu_kamar_dipesan;
+        $bookings->getCollection()->transform(function ($booking) {
+            if ($booking->rooms) {
+                $booking->total_harga = $booking->rooms->harga * $booking->jnu_kamar_dipesan;
+                $booking->tipe_kamar = $booking->rooms->nama;
+                $booking->image = $booking->rooms->image;
+            } else {
+                $booking->total_harga = 0;
+                $booking->tipe_kamar = 'Kamar sudah dihapus';
+                $booking->image = 'default.jpg';
+            }
 
             return $booking;
         });
@@ -139,18 +143,42 @@ class BookingController extends Controller
     {
         $booking = Booking::findOrFail($id);
 
-        // Validasi input update
         $request->validate([
+            'id_User' => 'required|integer',
+            'id_Kamar' => 'required|integer',
             'tgl_checkin' => 'required|date',
-            'tgl_checkout' => 'required|date',
+            'tgl_checkout' => 'required|date|after:tgl_checkin',
             'jnu_kamar_dipesan' => 'required|integer|min:1',
             'status_pemesanan' => 'required|string',
         ]);
 
-        // Update data booking
+        $oldRoom = Room::findOrFail($booking->id_Kamar);
+        $newRoom = Room::findOrFail($request->id_Kamar);
+
+        $oldQty = $booking->jnu_kamar_dipesan;
+        $newQty = $request->jnu_kamar_dipesan;
+
+        if ($booking->id_Kamar != $request->id_Kamar) {
+
+            // Kembalikan stok kamar lama
+            $oldRoom->jumlah_kamar += $oldQty;
+            $oldRoom->save();
+
+            // Pastikan kamar baru stok cukup
+            if ($newQty > $newRoom->jumlah_kamar) {
+                return back()->with('error', 'Stok kamar baru tidak cukup!');
+            }
+
+            // Kurangi stok kamar baru
+            $newRoom->jumlah_kamar -= $newQty;
+            $newRoom->save();
+
+        }
+
+        // Update booking
         $booking->update([
-            'id_User' => $request->id_User ?? $booking->id_User,
-            'id_Kamar' => $request->id_Kamar ?? $booking->id_Kamar,
+            'id_User' => $request->id_User,
+            'id_Kamar' => $request->id_Kamar,
             'tgl_checkin' => $request->tgl_checkin,
             'tgl_checkout' => $request->tgl_checkout,
             'jnu_kamar_dipesan' => $request->jnu_kamar_dipesan,
@@ -158,25 +186,7 @@ class BookingController extends Controller
         ]);
 
         return redirect()->route('admin.bookings.index')
-            ->with('success', 'Data booking berhasil diperbarui');
-    }
-
-    public function destroy($id)
-    {
-        // hapus booking (soft delete karena model pakai SoftDeletes)
-        Booking::findOrFail($id)->delete();
-
-        return back()->with('success', 'Booking berhasil dihapus');
-    }
-
-    public function updateStatus(Request $request, $id)
-    {
-        // Update status booking khusus admin
-        $booking = Booking::findOrFail($id);
-        $booking->status_pemesanan = $request->status;
-        $booking->save();
-
-        return back()->with('success', 'Status berhasil diperbarui');
+            ->with('success', 'Booking berhasil diperbarui.');
     }
 
     public function datatables()
@@ -203,13 +213,30 @@ class BookingController extends Controller
             ->addColumn('actions', function ($b) {
                 $viewUrl = route('admin.bookings.show', $b->id);
                 $editUrl = route('admin.bookings.edit', $b->id);
+                $deleteUrl = route('admin.bookings.delete', $b->id);
 
                 return '
-                    <div class="flex space-x-2 justify-center">
-                        <a href="'.$viewUrl.'" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded transition">View</a>
-                        <a href="'.$editUrl.'" class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold px-2 py-1 rounded transition">Edit</a>
-                    </div>
-                ';
+        <div class="flex space-x-2 justify-center">
+
+            <a href="'.$viewUrl.'"
+                class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded transition">
+                View
+            </a>
+
+            <a href="'.$editUrl.'"
+                class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold px-2 py-1 rounded transition">
+                Edit
+            </a>
+
+            <form action="'.$deleteUrl.'" method="POST" onsubmit="return confirm(\'Yakin ingin menghapus?\')">
+                '.csrf_field().method_field('DELETE').'
+                <button type="submit"
+                    class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded transition">
+                    Delete
+                </button>
+            </form>
+        </div>
+    ';
             })
             ->rawColumns(['actions']) // rawColumns = biar HTML ga di-escape
             ->make(true);
@@ -225,9 +252,9 @@ class BookingController extends Controller
             })
             ->toArray();
 
-        $labels = array_keys($bookings); // list bulan
-        $data = [];            // DITERIMA (variable lama, tidak diubah)
-        $data_rejected = [];   // DITOLAK (variable baru)
+        $labels = array_keys($bookings);
+        $data = [];
+        $data_rejected = [];
 
         // Hitung jumlah booking per bulan
         foreach ($bookings as $booking) {
@@ -285,5 +312,100 @@ class BookingController extends Controller
         $qrPath = asset('storage/'.$filePath);
 
         return view('user.booking.qr', compact('booking', 'qrPath', 'qrSvg'));
+    }
+
+    public function adminStore(Request $request)
+    {
+        $request->validate([
+            'id_User' => 'required|integer',
+            'id_Kamar' => 'required|integer',
+            'tgl_checkin' => 'required|date',
+            'tgl_checkout' => 'required|date|after:tgl_checkin',
+            'jnu_kamar_dipesan' => 'required|integer|min:1',
+            'status_pemesanan' => 'required|string',
+        ]);
+
+        $room = Room::findOrFail($request->id_Kamar);
+
+        // Cek stok
+        if ($request->jnu_kamar_dipesan > $room->jumlah_kamar) {
+            return back()->with('error', 'Stok kamar tidak cukup!');
+        }
+
+        // Buat kode booking
+        $kode = 'BOOK-'.strtoupper(Str::random(8));
+
+        // Create booking
+        $booking = Booking::create([
+            'p_lu_Pemesanan' => $kode,
+            'id_User' => $request->id_User,
+            'id_Kamar' => $request->id_Kamar,
+            'tgl_checkin' => $request->tgl_checkin,
+            'tgl_checkout' => $request->tgl_checkout,
+            'jnu_kamar_dipesan' => $request->jnu_kamar_dipesan,
+            'status_pemesanan' => $request->status_pemesanan,
+        ]);
+
+        // Kurangi stok kamar
+        $room->jumlah_kamar -= $request->jnu_kamar_dipesan;
+        $room->save();
+
+        return redirect()->route('admin.bookings.index')->with('success', 'Booking berhasil dibuat.');
+    }
+
+    public function trash()
+    {
+        $bookings = Booking::onlyTrashed()->with('rooms', 'user')->get();
+
+        return view('admin.booking.trash', compact('bookings'));
+    }
+
+    // Soft delete
+    public function destroy($id)
+    {
+        $booking = Booking::findOrFail($id);
+
+        // Kembalikan stok kamar sebelum hapus
+        $room = Room::find($booking->id_Kamar);
+        if ($room) {
+            $room->jumlah_kamar += $booking->jnu_kamar_dipesan;
+            $room->save();
+        }
+
+        $booking->delete();
+
+        return back()->with('success', 'Booking dipindahkan ke Trash.');
+    }
+
+    // Restore data dari trash
+    public function restore($id)
+    {
+        $booking = Booking::onlyTrashed()->findOrFail($id);
+
+        // Kurangi lagi stok kamar
+        $room = Room::find($booking->id_Kamar);
+        if ($room) {
+            if ($room->jumlah_kamar < $booking->jnu_kamar_dipesan) {
+                return back()->with('error', 'Stok kamar tidak cukup untuk restore!');
+            }
+            $room->jumlah_kamar -= $booking->jnu_kamar_dipesan;
+            $room->save();
+        }
+
+        $booking->restore();
+
+        return back()->with('success', 'Booking berhasil direstore.');
+    }
+
+    // Hapus permanen
+    public function deletePermanent($id)
+    {
+        $booking = Booking::onlyTrashed()->findOrFail($id);
+
+        // Hapus permanen
+        $booking->forceDelete();
+
+        return redirect()->route('admin.bookings.trash')
+            ->with('success', 'Booking berhasil dihapus permanen.');
     }
 }

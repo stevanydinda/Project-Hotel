@@ -1,4 +1,3 @@
-<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.tailwindcss.css">
 <?php $__env->startSection('content'); ?>
     <div class="container mx-auto mt-6 px-4">
 
@@ -14,10 +13,15 @@
                 class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded">
                 Tambah Data
             </a>
-            <a href="<?php echo e(url()->previous()); ?>"
+             <a href="<?php echo e(route('admin.rooms.trash')); ?>"
+                class="bg-blue-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+                Sampah
+            </a>
+            <a href="<?php echo e(route('admin.dashboard')); ?>"
                 class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
                 Kembali
             </a>
+
         </div>
 
         <h5 class="mb-3 text-xl font-semibold text-center">Data Kamar</h5>
@@ -33,6 +37,7 @@
                     <th class="p-2">Deskripsi</th>
                     <th class="p-2">Harga</th>
                     <th class="p-2">Tipe Kamar</th>
+                    <th class="p-2">Aksi</th>
                 </tr>
             </thead>
         </table>
@@ -53,8 +58,11 @@
                     },
                     {
                         data: 'gambar',
-                        name: 'gambar_kamar'
+                        name: 'image',
+                        searchable: false,
+                        orderable: false
                     },
+
                     {
                         data: 'name',
                         name: 'name'
@@ -79,6 +87,12 @@
                         data: 'kamar',
                         name: 'tipe_kamar'
                     },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        searchable: false,
+                        orderable: false
+                    }
                 ]
             });
         });

@@ -35,21 +35,13 @@
                     <a href="<?php echo e(route('admin.bookings.index')); ?>"
                         class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Laporan →</a>
                 </div>
-
-                <div class="bg-yellow-100 p-6 rounded-lg shadow hover:shadow-lg transition">
-                    <h3 class="text-lg font-semibold text-yellow-800 mb-2">Laporan Keuangan</h3>
-                    <p class="text-gray-700">Lihat data transaksi dan pembayaran terbaru.</p>
-                    <a href="<?php echo e(route('admin.payments.index')); ?>"
-                        class="inline-block mt-3 text-yellow-700 font-semibold hover:underline">Lihat Laporan →</a>
-                </div>
-
             </div>
         </div>
         <div class="mt-12 text-center">
             <h5 class="text-xl font-semibold text-yellow-800">Grafik Pembelian Kamar</h5>
         </div>
-        <div class ="bg-white p-6 rounded-lg shadow mt-6">
-            <canvas id="chartBar" class="w-full h-64"></canvas>
+        <div class ="bg-white p-6 rounded-lg shadow mt-6 w-3/4 mx-auto">
+            <canvas id="chartBar"></canvas>
         </div>
     </div>
 <?php $__env->stopSection(); ?>
@@ -62,7 +54,8 @@
             method: 'GET',
             success: function(response){
                 let labels = response.labels;
-                let data = response.data;
+                let data = response.data; // diterima
+                let data_rejected = response.data_rejected; // ditolak
 
                 const ctx = document.getElementById('chartBar').getContext('2d');
 
@@ -70,13 +63,22 @@
                     type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Jumlah Pemesanan Kamar',
-                            data: data,
-                            backgroundColor: 'rgba(255, 206, 86, 0.7)',
-                            borderColor: 'rgba(255, 206, 86, 1)',
-                            borderWidth: 1
-                        }]
+                        datasets: [
+                            {
+                                label: 'Diterima',
+                                data: data,
+                                backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                                borderColor: 'rgba(255, 206, 86, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Ditolak',
+                                data: data_rejected,
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         scales: {

@@ -16,6 +16,8 @@
 
             </div>
         <?php endif; ?>
+        
+
 
         <div class="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-200">
             <table class="min-w-full text-sm text-left text-gray-700">
@@ -81,4 +83,4 @@
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\hotel-project\resources\views\admin\room\trash.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\hotel-project\resources\views/admin/room/trash.blade.php ENDPATH**/ ?>

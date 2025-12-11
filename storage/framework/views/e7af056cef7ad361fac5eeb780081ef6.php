@@ -10,9 +10,13 @@
 
         <div class="flex justify-end space-x-2 mb-4">
             <div class="flex space-x-2">
-                <a href="<?php echo e(url()->previous()); ?>"
+                <a href="<?php echo e(route('admin.dashboard')); ?>"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
                     Kembali
+                </a>
+                <a href="<?php echo e(route('admin.bookings.trash')); ?>"
+                    class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+                    Sampah
                 </a>
             </div>
         </div>
@@ -86,8 +90,8 @@
                     },
 
                     {
-                        data: 'total_amount',
-                        name: 'total_amount'
+                        data: 'total_harga',
+                        name: 'total_harga'
                     },
 
                     {
@@ -102,10 +106,6 @@
                         searchable: false
                     }
                 ],
-
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/id.json'
-                },
 
             });
         });

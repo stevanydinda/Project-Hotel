@@ -128,37 +128,7 @@
                             Batalkan Booking
                         </button>
                     </form>
-                    <button type="button" onclick="createQR()"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-                        Bayar Sekarang
-                    </button>
-
-                    <input type="hidden" id="booking_id" value="<?php echo e($booking->id); ?>">
-
-                    <?php $__env->startPush('script'); ?>
-                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                        <script>
-                            function createQR() {
-                                const bookingId = $('#booking_id').val();
-
-                                $.ajax({
-                                    url: "<?php echo e(route('user.booking.generate-qr')); ?>",
-                                    type: "POST",
-                                    data: {
-                                        _token: "<?php echo e(csrf_token()); ?>",
-                                        booking_id: bookingId
-                                    },
-                                    success: function(response) {
-                                        alert(response.message);
-                                        window.location.href = `/user/booking/${bookingId}/payment`;
-                                    },
-                                    error: function(xhr) {
-                                        console.error(xhr.responseText);
-                                        alert("Terjadi kesalahan di server saat membuat QR!");
-                                    }
-                                });
-                            }
-                        </script>
-                    <?php $__env->stopPush(); ?>
+                </div>
+                <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\hotel-project\resources\views\user\booking\summary.blade.php ENDPATH**/ ?>

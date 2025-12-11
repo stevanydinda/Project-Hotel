@@ -1,6 +1,5 @@
 @extends('template.app')
-{{-- DATATABLES CSS --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.tailwindcss.css">
+
 @section('content')
     <div class="container mx-auto mt-6 px-4">
 
@@ -9,16 +8,26 @@
                 {{ Session::get('success') }}
             </div>
         @endif
+          @if (Session::get('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ Session::get('error') }}
+            </div>
+        @endif
 
         <div class="flex justify-end space-x-2 mb-4">
             <a href="{{ route('admin.rooms.create') }}"
                 class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded">
                 Tambah Data
             </a>
+             <a href="{{ route('admin.rooms.trash') }}"
+                class="bg-blue-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded">
+                Sampah
+            </a>
             <a href="{{ route('admin.dashboard')}}"
                 class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
                 Kembali
             </a>
+
         </div>
 
         <h5 class="mb-3 text-xl font-semibold text-center">Data Kamar</h5>
@@ -34,6 +43,7 @@
                     <th class="p-2">Deskripsi</th>
                     <th class="p-2">Harga</th>
                     <th class="p-2">Tipe Kamar</th>
+                    <th class="p-2">Aksi</th>
                 </tr>
             </thead>
         </table>
@@ -83,6 +93,12 @@
                         data: 'kamar',
                         name: 'tipe_kamar'
                     },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        searchable: false,
+                        orderable: false
+                    }
                 ]
             });
         });

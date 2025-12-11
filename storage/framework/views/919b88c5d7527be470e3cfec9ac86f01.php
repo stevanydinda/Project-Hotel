@@ -44,7 +44,7 @@
                                 'Pending' => 'bg-yellow-100 text-yellow-800',
                                 'Diterima' => 'bg-green-100 text-green-800',
                                 'Ditolak' => 'bg-red-100 text-red-800',
-                                'Batal' => 'bg-red-100 text-red-800'
+                                'Dibatalkan' => 'bg-red-100 text-red-800'
                             ];
                             $colorClass = $statusColors[$booking->status_pemesanan] ?? 'bg-gray-100 text-gray-800';
                         ?>
@@ -59,11 +59,9 @@
                             
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <?php if($booking->rooms->image): ?>
-                                        <img src="<?php echo e(asset('storage/' . $booking->rooms->image)); ?>"
-                                             class="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-200">
-                                    <?php endif; ?>
-                                    <span class="font-medium text-gray-800"><?php echo e($booking->rooms->name); ?></span>
+                                    <img src="<?php echo e(asset('storage/' . $booking->image)); ?>"
+                                         class="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-200">
+                                    <span class="font-medium text-gray-800"><?php echo e($booking->nama_kamar); ?></span>
                                 </div>
                             </td>
 
@@ -73,7 +71,7 @@
 
                             
                             <td class="px-6 py-4 font-semibold text-gray-900">
-                                Rp <?php echo e(number_format($booking->total_harga,0,',','.')); ?>
+                                Rp <?php echo e(number_format($booking->total_harga, 0, ',', '.')); ?>
 
                             </td>
 
@@ -118,6 +116,7 @@
                 </tbody>
             </table>
         </div>
+
         <div class="mt-8 flex justify-center">
             <?php echo e($bookings->links()); ?>
 

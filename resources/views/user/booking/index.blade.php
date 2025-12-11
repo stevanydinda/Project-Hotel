@@ -3,17 +3,17 @@
 @section('content')
 <div class="container mx-auto px-4 py-8">
 
-    {{--  Breadcrumb --}}
+    {{-- Breadcrumb --}}
     <nav class="mb-8 text-sm font-medium text-gray-700">
         <a href="{{ route('home') }}" class="text-blue-600 hover:text-blue-800">Home</a>
         <span class="mx-2 text-gray-400">/</span>
         <span class="text-gray-500">Riwayat Booking</span>
     </nav>
 
-    {{--  Judul Halaman --}}
+    {{-- Judul Halaman --}}
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Riwayat Booking Saya</h1>
 
-    {{--  Jika belum ada booking --}}
+    {{-- Jika belum ada booking --}}
     @if($bookings->isEmpty())
         <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-10 text-center shadow-sm">
             <i class="fas fa-calendar-times text-yellow-500 text-5xl mb-4"></i>
@@ -24,7 +24,7 @@
             </a>
         </div>
     @else
-        {{--  Tabel Booking --}}
+        {{-- Tabel Booking --}}
         <div class="overflow-x-auto bg-white rounded-2xl shadow-md border border-gray-100">
             <table class="min-w-full text-sm text-gray-700">
                 <thead class="bg-gray-50">
@@ -46,25 +46,23 @@
                                 'Pending' => 'bg-yellow-100 text-yellow-800',
                                 'Diterima' => 'bg-green-100 text-green-800',
                                 'Ditolak' => 'bg-red-100 text-red-800',
-                                'Batal' => 'bg-red-100 text-red-800'
+                                'Dibatalkan' => 'bg-red-100 text-red-800'
                             ];
                             $colorClass = $statusColors[$booking->status_pemesanan] ?? 'bg-gray-100 text-gray-800';
                         @endphp
 
                         <tr class="hover:bg-gray-50 transition">
-                            {{--  Kode Booking --}}
+                            {{-- Kode Booking --}}
                             <td class="px-6 py-4 font-semibold text-gray-900">
                                 {{ $booking->p_lu_Pemesanan }}
                             </td>
 
-                            {{--  Nama & Gambar Kamar --}}
+                            {{-- Nama & Gambar Kamar --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    @if($booking->rooms->image)
-                                        <img src="{{ asset('storage/' . $booking->rooms->image) }}"
-                                             class="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-200">
-                                    @endif
-                                    <span class="font-medium text-gray-800">{{ $booking->rooms->name }}</span>
+                                    <img src="{{ asset('storage/' . $booking->image) }}"
+                                         class="w-12 h-12 object-cover rounded-lg shadow-sm border border-gray-200">
+                                    <span class="font-medium text-gray-800">{{ $booking->nama_kamar }}</span>
                                 </div>
                             </td>
 
@@ -72,19 +70,19 @@
                             <td class="px-6 py-4">{{ date('d M Y', strtotime($booking->tgl_checkin)) }}</td>
                             <td class="px-6 py-4">{{ date('d M Y', strtotime($booking->tgl_checkout)) }}</td>
 
-                            {{--  Total Harga --}}
+                            {{-- Total Harga --}}
                             <td class="px-6 py-4 font-semibold text-gray-900">
-                                Rp {{ number_format($booking->total_harga,0,',','.') }}
+                                Rp {{ number_format($booking->total_harga, 0, ',', '.') }}
                             </td>
 
-                            {{--  Status --}}
+                            {{-- Status --}}
                             <td class="px-6 py-4">
                                 <span class="px-3 py-1 rounded-full text-xs font-bold {{ $colorClass }}">
                                     {{ $booking->status_pemesanan }}
                                 </span>
                             </td>
 
-                            {{--  Aksi --}}
+                            {{-- Aksi --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-2">
                                     {{-- Jika Pending → Bayar & Batal --}}
@@ -117,6 +115,7 @@
                 </tbody>
             </table>
         </div>
+
         <div class="mt-8 flex justify-center">
             {{ $bookings->links() }}
         </div>

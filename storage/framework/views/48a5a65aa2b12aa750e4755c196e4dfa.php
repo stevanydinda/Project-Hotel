@@ -46,7 +46,7 @@
 
                 <!-- Buttons -->
                 <div class="flex space-x-2">
-                    <a href="<?php echo e(route('user.kamar.show', $room->id)); ?>"
+                    <a href="<?php echo e(route('user.room.show', $room->id)); ?>"
                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded">
                         Lihat Detail
                     </a>

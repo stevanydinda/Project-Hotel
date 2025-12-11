@@ -1,21 +1,24 @@
-<?php $__env->startSection('content'); ?>
+@extends('template.app')
+
+@section('content')
     <div class="max-w-6xl mx-auto px-6 py-8">
 
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-semibold text-yellow-700">Data Sampah Kamar</h2>
 
-            <a href="<?php echo e(route('admin.rooms.index')); ?>"
+            <a href="{{ route('admin.rooms.index') }}"
                 class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
                 Kembali
             </a>
         </div>
 
-        <?php if(Session::get('success')): ?>
+        @if (Session::get('success'))
             <div class="mb-4 bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
-                <?php echo e(Session::get('success')); ?>
-
+                {{ Session::get('success') }}
             </div>
-        <?php endif; ?>
+        @endif
+        
+
 
         <div class="overflow-x-auto bg-white rounded-xl shadow-md border border-gray-200">
             <table class="min-w-full text-sm text-left text-gray-700">
@@ -31,32 +34,32 @@
                 </thead>
 
                 <tbody>
-                    <?php $__empty_1 = true; $__currentLoopData = $rooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    @forelse ($rooms as $key => $room)
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 border-b"><?php echo e($key + 1); ?></td>
-                            <td class="px-6 py-4 border-b"><?php echo e($room->name); ?></td>
-                            <td class="px-6 py-4 border-b"><?php echo e($room->tipe_kamar); ?></td>
-                            <td class="px-6 py-4 border-b">Rp <?php echo e(number_format($room->harga, 0, ',', '.')); ?></td>
-                            <td class="px-6 py-4 border-b"><?php echo e($room->jumlah_kamar); ?></td>
+                            <td class="px-6 py-4 border-b">{{ $key + 1 }}</td>
+                            <td class="px-6 py-4 border-b">{{ $room->name }}</td>
+                            <td class="px-6 py-4 border-b">{{ $room->tipe_kamar }}</td>
+                            <td class="px-6 py-4 border-b">Rp {{ number_format($room->harga, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4 border-b">{{ $room->jumlah_kamar }}</td>
 
                             <td class="px-6 py-4 border-b text-center space-x-2">
 
-                                
-                                <form action="<?php echo e(route('admin.rooms.restore', $room->id)); ?>" method="POST"
+                                {{-- Restore --}}
+                                <form action="{{ route('admin.rooms.restore', $room->id) }}" method="POST"
                                     class="inline-block">
-                                    <?php echo csrf_field(); ?>
-                                    <?php echo method_field('PATCH'); ?>
+                                    @csrf
+                                    @method('PATCH')
                                     <button
                                         class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition">
                                         Kembalikan
                                     </button>
                                 </form>
 
-                                
-                                <form action="<?php echo e(route('admin.rooms.deletePermanent', $room->id)); ?>" method="POST"
+                                {{-- Delete Permanent --}}
+                                <form action="{{ route('admin.rooms.deletePermanent', $room->id) }}" method="POST"
                                     class="inline-block">
-                                    <?php echo csrf_field(); ?>
-                                    <?php echo method_field('DELETE'); ?>
+                                    @csrf
+                                    @method('DELETE')
                                     <button onclick="return confirm('Hapus permanen?')"
                                         class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition">
                                         Hapus Permanen
@@ -66,19 +69,17 @@
 
                             </td>
                         </tr>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    @empty
                         <tr>
                             <td colspan="6" class="px-6 py-6 text-center text-gray-500">
                                 Tidak ada data kamar di sampah.
                             </td>
                         </tr>
-                    <?php endif; ?>
+                    @endforelse
                 </tbody>
 
             </table>
         </div>
 
     </div>
-<?php $__env->stopSection(); ?>
-
-<?php echo $__env->make('template.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\hotel-project\resources\views\admin\room\trash.blade.php ENDPATH**/ ?>
+@endsection

@@ -1,15 +1,18 @@
 <?php $__env->startSection('content'); ?>
 <div class="container mx-auto px-4 py-6 text-center">
     <h1 class="text-2xl font-bold mb-4">QR Code Check-in</h1>
-
     <p class="text-gray-600 mb-6">
         Tunjukkan QR Code ini saat check-in di hotel.
     </p>
 
-    <div class="inline-block p-4 bg-white shadow-lg rounded-xl">
-        <?php echo $qrCode; ?>
 
-    </div>
+    <?php if(Storage::disk('public')->exists('qrcodes/' . $booking->p_lu_Pemesanan . '.svg')): ?>
+        <img src="<?php echo e($qrPath); ?>" alt="QR Code" class="mx-auto w-60 h-60">
+    <?php else: ?>
+
+        <?php echo $qrSvg; ?>
+
+    <?php endif; ?>
 
     <div class="mt-6">
         <a href="<?php echo e(route('user.my.bookings')); ?>" class="text-blue-600 hover:text-blue-800">
